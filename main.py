@@ -18,8 +18,15 @@ def extract_flat_details(flat_soup):
     landlord = flat_soup.select_one('div[class*="ProviderName"]').string
     if flat_soup.find("i", text="location"):
         location = flat_soup.find("i", text="location").nextSibling.text.split(', ')
-        street = location[0]
-        district = location[1]
+        if len(location) == 2:
+            full_street = location[0]
+            street = re.sub(r'\d+', '', full_street).strip()
+            district = location[1]
+            house_number = re.findall('\d+', full_street)[0]
+        else:
+            district = location[0]
+            street = ''
+            house_number = ""
 
     else:
         location = ''
@@ -32,8 +39,8 @@ def extract_flat_details(flat_soup):
         "Preis": price.split(" ")[0],
         "Quadratmeter": qm.split(" ")[0],
         "Zimmer": rooms.split(" ")[0],
-        "Straße": re.sub(r'\d+', '', street).strip(),
-        "Hausnummer": re.findall('\d+', street)[0],
+        "Straße": street,
+        "Hausnummer": house_number,
         "Stadtteil": district,
         "Beschreibung": description
     }
